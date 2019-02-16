@@ -9,10 +9,6 @@
             </ul>
             <div class="layui-tab-content" style="padding: 20px 0;">
                 <div class="layui-form-pane layui-tab-item layui-show">
-                   <blockquote class="layui-elem-quote">
-                        <p> 注意事项： </p>
-                        <p> 此项功能会改变商品单页显示样式;</p>
-                    </blockquote>
                     <form class="layui-form layui-show" method="post">
                         <div class="layui-form-item">
                             <label for="name" class="layui-form-label">配置名</label>
@@ -25,8 +21,8 @@
 							<label for="value" class="layui-form-label">值</label>
 							<div class="layui-input-inline">
 								 <select name="value">
-									<option value="default" <?php if($item['value']=="default"):?>selected=""<?php endif;?>>默认模式(商品详情)</option>
-									<option value="two" <?php if($item['value']=="two"):?>selected=""<?php endif;?>>淘宝模式(商品详情)</option>
+									<option value="0" <?php if($item['value']=="0"):?>selected=""<?php endif;?>>定时任务</option>
+									<option value="1" <?php if($item['value']=="1"):?>selected=""<?php endif;?>>系统自动</option>
 								  </select>
 							</div>
 						</div> 

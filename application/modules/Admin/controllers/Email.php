@@ -38,6 +38,7 @@ class EmailController extends AdminBasicController
 		$sendname = $this->getPost('sendname',false);
 		$host = $this->getPost('host',false);
 		$port = $this->getPost('port',false);
+		$isssl = $this->getPost('isssl');
 		$csrf_token = $this->getPost('csrf_token', false);
 		
 		$data = array();
@@ -47,15 +48,16 @@ class EmailController extends AdminBasicController
 			Helper::response($data);
         }
 		
-		if($method AND $mailaddress AND $mailpassword AND $sendmail AND $sendname AND $host AND $port AND $csrf_token){
+		if($method AND $mailaddress AND $mailpassword AND $sendmail AND $sendname AND $host AND $port AND is_numeric($isssl) AND $csrf_token){
 			if ($this->VerifyCsrfToken($csrf_token)) {
-				$m=array(
+				$m = array(
 					'mailaddress'=>$mailaddress,
 					'mailpassword'=>$mailpassword,
 					'sendmail'=>$sendmail,
 					'sendname'=>$sendname,
 					'host'=>$host,
 					'port'=>$port,
+					'isssl'=>$isssl
 				);
 				if($method == 'edit' AND $id>0){
 					$u = $this->m_email->UpdateByID($m,$id);
@@ -68,7 +70,7 @@ class EmailController extends AdminBasicController
 					}
 				}else{
 					$id = $this->m_email->Insert($m);
-					if($id){
+					if($id>0){
 						//更新缓存 
 						$this->m_email->getConfig(1);
 						$data = array('code' => 1, 'msg' => '新增成功');
