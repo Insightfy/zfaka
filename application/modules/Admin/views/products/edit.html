@@ -54,11 +54,12 @@
                             </div>
                         </div>
                         <div class="layui-form-item">
-                            <label class="layui-form-label">是否库存控制</label>
-                            <div class="layui-input-block">
+                            <label class="layui-form-label">库存控制</label>
+                            <div class="layui-input-inline">
                                 <input type="radio" name="stockcontrol" lay-filter="stockcontrol" value="1" title="限制" <?php if($product['stockcontrol']=='1' ):?>checked=""<?php endif;?>>
                                 <input type="radio" name="stockcontrol" lay-filter="stockcontrol" value="0" title="不限制" <?php if($product['stockcontrol']=='0' ):?>checked=""<?php endif;?>>
                             </div>
+							<div class="layui-form-mid layui-word-aux">限制库存：自动发货时卡密一次性；不限制库存：自动发货时卡密重复使用；</div>
                         </div>
                         <div class="layui-form-item">
                             <label for="qty" class="layui-form-label">库存数量</label>
@@ -72,10 +73,39 @@
                             </div>
                         </div>
                         <div class="layui-form-item">
+                            <label class="layui-form-label">虚拟开关</label>
+                            <div class="layui-input-inline">
+                                <input type="radio" name="qty_switch" value="0" title="关" <?php if($product['qty_switch']=='0' ):?>checked=""<?php endif;?>>
+                                <input type="radio" name="qty_switch" value="1" title="开" <?php if($product['qty_switch']=='1' ):?>checked=""<?php endif;?>>
+                            </div>
+							<div class="layui-form-mid layui-word-aux">虚拟开关，关：显示真实库存；开：显示虚拟库存</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="qty_virtual" class="layui-form-label">虚拟库存</label>
+                            <div class="layui-input-inline">
+                                <input type="number" id="qty_virtual" name="qty_virtual" lay-verify="required" autocomplete="off" value="<?php echo $product['qty_virtual'];?>" class="layui-input">
+                            </div>
+							<div class="layui-form-mid layui-word-aux">虚拟库存可随意修改，每销售一笔销量会变更</div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="qty_sell" class="layui-form-label">销量</label>
+                            <div class="layui-input-inline">
+                                <input type="number" id="qty_sell" name="qty_sell" lay-verify="required" autocomplete="off" value="<?php echo $product['qty_sell'];?>" class="layui-input">
+                            </div>
+							<div class="layui-form-mid layui-word-aux">销量可随意修改，每销售一笔销量会变更</div>
+                        </div>
+                        <div class="layui-form-item">
                             <label for="price" class="layui-form-label">单价</label>
                             <div class="layui-input-inline">
                                 <input type="number" id="price" name="price" lay-verify="required" autocomplete="off" value="<?php echo $product['price'];?>" class="layui-input">
                             </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <label for="price_ori" class="layui-form-label">原价</label>
+                            <div class="layui-input-inline">
+                                <input type="number" id="price_ori" name="price_ori" lay-verify="required" autocomplete="off" value="<?php echo $product['price_ori'];?>" class="layui-input">
+                            </div>
+							<div class="layui-form-mid layui-word-aux">仅做页面显示用</div>
                         </div>
                         <div class="layui-form-item">
                             <label class="layui-form-label">发货模式</label>

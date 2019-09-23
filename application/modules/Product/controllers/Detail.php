@@ -6,7 +6,7 @@
  * Date:20180707
  */
 
-class DetailController extends PcBasicController
+class DetailController extends ProductBasicController
 {
 	private $m_products;
 	private $m_products_pifa;
@@ -40,38 +40,28 @@ class DetailController extends PcBasicController
 					$data['addons'] = array();
 				}
 				
+				//库存字段－处理虚拟库存与真实库存
+				if($product['qty_switch']>0){
+					$product['qty'] = $product['qty_virtual'];
+				}
+				
 				//如果是密码商品
 				if(strlen($product['password'])>0){
+					$tpl = "password";
+					$data['product'] = $product;
+					$data['title'] = $product['name']."_购买商品";
 					if($this->config['tplproduct']=="default"){
-						$tpl = "password";
+						$this->display($tpl, $data);
+						return FALSE;
 					}else{
-						$tpl = $this->config['tplproduct']."password";
-					}
-					
-					if(file_exists(APP_PATH.'/application/modules/Product/views/detail/tpl/'.$tpl.'.html')){
-						$data['product'] = $product;
-						$data['title'] = $product['name']."_购买商品";
-						if($this->config['tplproduct']=="default"){
-							$this->display("tpl_".$tpl, $data);
-							return FALSE;
-						}else{
-							$this->display("tpl_".$tpl, $data);
-							return FALSE;
-						}
-					}else{
-						$this->show_message('error','丢失模版','/product/');
-						return FALSE; 
+						$this->display($tpl, $data);
+						return FALSE;
 					}
 				}else{
 				//否则
 					$data['product'] = $product;
 					$data['title'] = $product['name']."_购买商品";
-					if($this->config['tplproduct']=="default"){
-						$this->getView()->assign($data);
-					}else{
-						$this->display("tpl_".$this->config['tplproduct'], $data);
-						return FALSE;
-					}
+					$this->getView()->assign($data);
 				}
 			}else{
 				$this->redirect("/product/");

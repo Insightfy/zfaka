@@ -6,7 +6,7 @@
  * Date:20180528
  */
 
-class LoginController extends PcBasicController
+class LoginController extends MemberBasicController
 {
 	private $m_user;
 	private $m_user_login_logs;
@@ -50,6 +50,7 @@ class LoginController extends PcBasicController
 		
 		if($email AND $password AND $csrf_token){
 			if ($this->VerifyCsrfToken($csrf_token)) {
+				$email = strtolower($email);
 				if(isEmail($email)){
 					if(isset($this->config['yzmswitch']) AND $this->config['yzmswitch']>0){
 						$vercode = $this->getPost('vercode');

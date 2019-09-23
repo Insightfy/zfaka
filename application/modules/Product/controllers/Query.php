@@ -5,7 +5,7 @@
  * Date:20180509
  */
 
-class QueryController extends PcBasicController
+class QueryController extends ProductBasicController
 {
 	private $m_order;
 	private $method_array = array();
@@ -21,7 +21,7 @@ class QueryController extends PcBasicController
 		$data = array();
 		$zlkbmethod = $this->get("zlkbmethod");
 		if(!in_array($zlkbmethod,$this->method_array)){
-			$zlkbmethod = "contact";
+			$zlkbmethod = "orderid";
 		}
 		
 		if($zlkbmethod == "auto"){
@@ -48,14 +48,15 @@ class QueryController extends PcBasicController
 			}
 		}
 
-		$data['title'] = "订单查询";
-		if(file_exists(APP_PATH.'/application/modules/Product/views/query/tpl/'.$zlkbmethod.'.html')){
-			$tpl = 'tpl_'.$zlkbmethod;
-			$this->display($tpl, $data);
-			return FALSE;
-		}else{
-			$this->getView()->assign($data);
+		if($zlkbmethod == "contact" AND isset($this->config['querycontactswitch']) AND $this->config['querycontactswitch']<0){
+			$this->show_message('error','当前查询方式已关闭','/');
+			return FALSE; 
 		}
+		
+		$data['title'] = "订单查询";
+		$tpl = $zlkbmethod;
+		$this->display($tpl, $data);
+		return FALSE;
     }
 	
 	public function ajaxAction()
@@ -65,57 +66,61 @@ class QueryController extends PcBasicController
 		if($zlkbmethod AND $csrf_token){
 			if(in_array($zlkbmethod,$this->method_array)){
 				if($zlkbmethod == 'contact'){
-					$chapwd    = $this->getPost('chapwd');
-					if($chapwd){
-						if ($this->VerifyCsrfToken($csrf_token)) {
-							if(isset($this->config['orderinputtype']) AND $this->config['orderinputtype']=='2'){
-								$qq = $this->getPost('qq');
-								if($qq AND is_numeric($qq)){
-									$email = $qq.'@qq.com';
-								}else{
-									$data = array('code' => 1006, 'msg' => '丢失参数');
-									Helper::response($data);
-								}
-							}else{
-								$email = $this->getPost('email',false);
-								if($email AND isEmail($email)){
-									$qq = '';
-								}else{
-									$data = array('code' => 1006, 'msg' => '丢失参数');
-									Helper::response($data);
-								}
-							}
-							
-							if(isset($this->config['yzmswitch']) AND $this->config['yzmswitch']>0){
-								$vercode = $this->getPost('vercode');
-								if($vercode){
-									if(strtolower($this->getSession('productqueryCaptcha')) == strtolower($vercode)){
-										$this->unsetSession('productqueryCaptcha');
+					if($zlkbmethod == "contact" AND isset($this->config['querycontactswitch']) AND $this->config['querycontactswitch']<0){
+						$data = array('code' => 1000, 'msg' => '当前查询方式已关闭');
+					}else{
+						$chapwd = $this->getPost('chapwd');
+						if($chapwd AND strlen($chapwd)>0){
+							if ($this->VerifyCsrfToken($csrf_token)) {
+								if(isset($this->config['orderinputtype']) AND $this->config['orderinputtype']=='2'){
+									$qq = $this->getPost('qq');
+									if($qq AND is_numeric($qq)){
+										$email = $qq.'@qq.com';
 									}else{
-										$data=array('code'=>1004,'msg'=>'图形验证码错误');
+										$data = array('code' => 1006, 'msg' => '丢失参数');
 										Helper::response($data);
 									}
 								}else{
-									$data = array('code' => 1000, 'msg' => '丢失参数');
-									Helper::response($data);
+									$email = $this->getPost('email',false);
+									if($email AND isEmail($email)){
+										$qq = '';
+									}else{
+										$data = array('code' => 1006, 'msg' => '丢失参数');
+										Helper::response($data);
+									}
 								}
+								
+								if(isset($this->config['yzmswitch']) AND $this->config['yzmswitch']>0){
+									$vercode = $this->getPost('vercode');
+									if($vercode){
+										if(strtolower($this->getSession('productqueryCaptcha')) == strtolower($vercode)){
+											$this->unsetSession('productqueryCaptcha');
+										}else{
+											$data=array('code'=>1004,'msg'=>'图形验证码错误');
+											Helper::response($data);
+										}
+									}else{
+										$data = array('code' => 1000, 'msg' => '丢失参数');
+										Helper::response($data);
+									}
+								}
+								
+								$chapwd_string = new \Safe\MyString($chapwd);
+								$chapwd = $chapwd_string->trimall()->qufuhao2()->getValue();
+								
+								$starttime = strtotime("-1 month");
+								$order = $this->m_order->Where(array('email'=>$email,'chapwd'=>$chapwd))->Where(array('isdelete'=>0))->Where("addtime>={$starttime}")->Order(array('id'=>'desc'))->Select();
+								if(empty($order)){
+									$data=array('code'=>1005,'msg'=>'订单不存在(最近1个月)');
+								}else{
+									$data=array('code'=>1,'msg'=>'查询成功','data'=>$order,'count'=>count($order));
+								}
+							} else {
+								$data = array('code' => 1001, 'msg' => '页面超时，请刷新页面后重试!');
 							}
-							
-							$chapwd_string = new \Safe\MyString($chapwd);
-							$chapwd = $chapwd_string->trimall()->qufuhao2()->getValue();
-							
-							$starttime = strtotime("-1 month");
-							$order = $this->m_order->Where(array('email'=>$email,'chapwd'=>$chapwd))->Where(array('isdelete'=>0))->Where("addtime>={$starttime}")->Order(array('id'=>'desc'))->Select();
-							if(empty($order)){
-								$data=array('code'=>1005,'msg'=>'订单不存在(最近1个月)');
-							}else{
-								$data=array('code'=>1,'msg'=>'查询成功','data'=>$order,'count'=>count($order));
-							}
-						} else {
-							$data = array('code' => 1001, 'msg' => '页面超时，请刷新页面后重试!');
+						}else{
+							$data = array('code' => 1000, 'msg' => '丢失参数');
 						}
-					}else{
-						$data = array('code' => 1000, 'msg' => '丢失参数');
 					}
 				//订单号查询	
 				}elseif($zlkbmethod == 'orderid'){
@@ -145,7 +150,7 @@ class QueryController extends PcBasicController
 							$ip = getClientIP();
 							$order = $this->m_order->Where(array('orderid'=>$orderid,'isdelete'=>0,'ip'=>$ip))->Where("addtime>={$starttime}")->Order(array('id'=>'desc'))->Select();
 							if(empty($order)){
-								$data=array('code'=>1005,'msg'=>'订单不存在(最近1个月)');
+								$data=array('code'=>1005,'msg'=>'订单不存在/当前IP与下单IP不符(最近1个月)');
 							}else{
 								$data=array('code'=>1,'msg'=>'查询成功','data'=>$order,'count'=>count($order));
 							}

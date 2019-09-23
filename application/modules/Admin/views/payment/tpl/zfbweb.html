@@ -51,9 +51,8 @@
                             <label class="layui-form-label">签名方式</label>
                             <div class="layui-input-inline">
                                 <select name="sign_type" lay-filter="required">
-                                    <option value=""></option>
-                                    <option value="RSA">RSA</option>
-                                    <option value="RSA2" selected="">RSA2</option>
+                                    <option value="RSA" <?php if($item['sign_type']=='RSA' ):?>checked=""<?php endif;?>>RSA</option>
+                                    <option value="RSA2"<?php if($item['sign_type']=='RSA2' ):?>checked=""<?php endif;?>>RSA2</option>
                                 </select>
                             </div>
                         </div>

@@ -73,11 +73,13 @@ class notify
 										//3.1.2.1 直接进行密码与订单的关联
 										$m_products_card->Where("id in ({$card_id_str})")->Where(array('active'=>0))->Update(array('active'=>1));
 										//3.1.2.2 然后进行库存清减
-										$qty_m = array('qty' => 'qty-'.$order['number']);
+										$qty_m = array('qty' => 'qty-'.$order['number'],'qty_virtual' => 'qty_virtual-'.$order['number'],'qty_sell'=>'qty_sell+'.$order['number']);
 										$m_products->Where(array('id'=>$order['pid'],'stockcontrol'=>1))->Update($qty_m,TRUE);
 										$kucunNotic=";当前商品库存剩余:".($product['qty']-$order['number']);
 									}else{
 										//3.1.2.3不进行库存控制时,自动发货商品是不需要减库存，也不需要取消密码；因为这种情况下的密码是通用的；
+										$qty_m = array('qty_sell'=>'qty_sell+'.$order['number']);
+										$m_products->Where(array('id'=>$order['pid'],'stockcontrol'=>0))->Update($qty_m,TRUE);
 										$kucunNotic="";
 									}
 									//3.1.3 更新订单状态,同时把密码写到订单中
@@ -137,8 +139,11 @@ class notify
 								//4.手工操作
 								//4.1如果商品有进行库存控制，就减库存
 								if($product['stockcontrol']>0){
-									$qty_m = array('qty' => 'qty-'.$order['number']);
+									$qty_m = array('qty' => 'qty-'.$order['number'],'qty_virtual' => 'qty_virtual-'.$order['number'],'qty_sell'=>'qty_sell+'.$order['number']);
 									$m_products->Where(array('id'=>$order['pid'],'stockcontrol'=>1))->Update($qty_m,TRUE);
+								}else{
+									$qty_m = array('qty_sell'=>'qty_sell+'.$order['number']);
+									$m_products->Where(array('id'=>$order['pid'],'stockcontrol'=>0))->Update($qty_m,TRUE);
 								}
 								//4.2邮件通知写到消息队列中，然后用定时任务去执行即可
 								$m = array();
@@ -175,10 +180,9 @@ class notify
 				$data =array('code'=>1003,'msg'=>'订单号不存在');
 			}
 		} catch(\Exception $e) {
-			file_put_contents(YEWU_FILE, CUR_DATETIME.'-'.$e->getMessage().PHP_EOL, FILE_APPEND);
+			file_put_contents(YEWU_FILE, CUR_DATETIME.'-reuslt:-notify'.$e->getMessage().PHP_EOL, FILE_APPEND);
 			$data =array('code'=>1001,'msg'=>$e->getMessage());
 		}
-		//file_put_contents(YEWU_FILE, CUR_DATETIME.'-'.'异步处理结果:'.json_encode($data).PHP_EOL, FILE_APPEND);
 		return $data;
 	}
 }

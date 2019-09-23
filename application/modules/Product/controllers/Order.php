@@ -5,7 +5,7 @@
  * Date:20180509
  */
 
-class OrderController extends PcBasicController
+class OrderController extends ProductBasicController
 {
 	private $m_products;
 	private $m_order;
@@ -32,20 +32,32 @@ class OrderController extends PcBasicController
 		$addons = $this->getPost('addons');
 		$csrf_token = $this->getPost('csrf_token', false);
 		
-		$chapwd_string = new \Safe\MyString($chapwd);
-		$chapwd = $chapwd_string->trimall()->qufuhao2()->getValue();
-		
-		
-		if(is_numeric($pid) AND $pid>0 AND is_numeric($number) AND $number>0  AND $chapwd AND $csrf_token){
+		if(is_numeric($pid) AND $pid>0 AND is_numeric($number) AND $number>0 AND $csrf_token){
 			if ($this->VerifyCsrfToken($csrf_token)) {
+				
+				if(isset($this->config['querycontactswitch']) AND $this->config['querycontactswitch']>0){
+					if($chapwd AND strlen($chapwd)>0){
+						$chapwd_string = new \Safe\MyString($chapwd);
+						$chapwd = $chapwd_string->trimall()->qufuhao2()->getValue();	
+					}else{
+						$data = array('code' => 1006, 'msg' => '丢失参数');
+						Helper::response($data);
+					}
+				}
+				
 				if(isset($this->config['orderinputtype']) AND $this->config['orderinputtype']=='2'){
 					if($this->login AND $this->userid){
 						$email = $this->uinfo['email'];
 						$qq = '';
 					}else{
 						$qq = $this->getPost('qq');
-						if($qq AND is_numeric($qq)){
-							$email = $qq.'@qq.com';
+						if($qq){
+							if(is_numeric($qq)){
+								$email = $qq.'@qq.com';
+							}else{
+								$data = array('code' => 1006, 'msg' => 'QQ格式不正确');
+								Helper::response($data);	
+							}
 						}else{
 							$data = array('code' => 1006, 'msg' => '丢失参数');
 							Helper::response($data);
@@ -53,8 +65,14 @@ class OrderController extends PcBasicController
 					}
 				}else{
 					$email = $this->getPost('email',false);
-					if($email AND isEmail($email)){
-						$qq = '';
+					if($email){
+						$email = strtolower($email);
+						if(isEmail($email)){
+							$qq = '';
+						}else{
+							$data = array('code' => 1006, 'msg' => '邮箱格式不正确');
+							Helper::response($data);
+						}
 					}else{
 						$data = array('code' => 1006, 'msg' => '丢失参数');
 						Helper::response($data);
@@ -265,7 +283,7 @@ class OrderController extends PcBasicController
 									}
 									$payclass = "\\Pay\\".$paymethod."\\".$paymethod;
 									$PAY = new $payclass();
-									$params =array('pid'=>$order['pid'],'orderid'=>$orderid,'money'=>$order['money'],'productname'=>$productname,'weburl'=>$this->config['weburl'],'qrserver'=>$this->config['qrserver']);
+									$params =array('pid'=>$order['pid'],'orderid'=>$orderid,'money'=>$order['money'],'productname'=>$productname,'webname'=>$this->config['webname'],'weburl'=>$this->config['weburl'],'qrserver'=>$this->config['qrserver']);
 									$data = $PAY->pay($payconfig,$params);
 								} catch (\Exception $e) {
 									$data = array('code' => 1005, 'msg' => $e->getMessage());
@@ -342,7 +360,7 @@ class OrderController extends PcBasicController
 							try{
 								$payclass = "\\Pay\\".$paymethod."\\".$paymethod;
 								$PAY = new $payclass();
-								$params =array('orderid'=>$orderid,'money'=>$order['money'],'productname'=>$order['productname'],'weburl'=>$this->config['weburl']);
+								$params =array('orderid'=>$orderid,'money'=>$order['money'],'productname'=>$order['productname'],'weburl'=>$this->config['weburl'],'order'=>$order);
 								$msg = $PAY->jump($payconfig,$params);
 							} catch (\Exception $e) {
 								$msg = $e->getMessage();

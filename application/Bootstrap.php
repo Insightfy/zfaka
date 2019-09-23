@@ -7,7 +7,8 @@ class Bootstrap extends \Yaf\Bootstrap_Abstract
 		\Yaf\Loader::import(CORE_PATH.'/Helper.php');
         \Yaf\Loader::import(CORE_PATH.'/Basic.php');
 		\Yaf\Loader::import(CORE_PATH.'/Model.php');
-		\Yaf\Loader::import(CORE_PATH.'/BasicPc.php');
+		\Yaf\Loader::import(CORE_PATH.'/BasicProduct.php');
+		\Yaf\Loader::import(CORE_PATH.'/BasicMember.php');
 		\Yaf\Loader::import(CORE_PATH.'/BasicAdmin.php');
 		\Yaf\Loader::import(FUNC_PATH.'/F_Basic.php');
 		\Yaf\Loader::import(FUNC_PATH.'/F_Network.php');
@@ -39,7 +40,12 @@ class Bootstrap extends \Yaf\Bootstrap_Abstract
             array(1 => 'zlkbmethod',2 => 'orderid')
         );
         $router->addRoute('order_query', $order_query);	
-		
+        $order_notify = new Yaf\Route\Regex(
+            '#notify/([0-9A-Za-z]+).html#',
+            array('module' => 'product', 'controller' => 'notify', 'action' => 'index'),
+            array(1 => 'paymethod')
+        );
+        $router->addRoute('order_notify', $order_notify);			
 	}
 	
     public function _initPlugin(\Yaf\Dispatcher $dispatcher)

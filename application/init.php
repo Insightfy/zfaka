@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Chongqing');
 define('ENV', strtoupper(ini_get('yaf.environ')));
-define('VERSION', '1.3.8');
+define('VERSION', '1.4.3');
 define('WEB_NAME',"ZFAKA平台");
 define('URL_KEY', 'faG2#@@1');
 define('CUR_DATE', date('Y-m-d'));
@@ -14,7 +14,7 @@ define('LIB_PATH',     APP_PATH.'/application/library/');
 define('CORE_PATH',    LIB_PATH.'/Core/');
 define('MODEL_PATH',   APP_PATH.'/application/model/');
 define('FUNC_PATH',    APP_PATH.'/application/function/');
-define('COMMON_PATH',  APP_PATH.'/application/views/common/');
+define('MEMBER_COMMON_PATH', APP_PATH . '/application/modules/Member/views/common/');
 define('ADMIN_COMMON_PATH', APP_PATH . '/application/modules/'.ADMIN_DIR.'/views/common/');
 define('TEMP_PATH',    APP_PATH.'/temp/');
 define('UPLOAD_PATH', APP_PATH.'/public/res/upload/');
